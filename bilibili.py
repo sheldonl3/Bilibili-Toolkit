@@ -1031,12 +1031,15 @@ class Bilibili:
                     'value': value,
                     'domain': ".bilibili.com",
                 })
+
+            '''   #can not 监视库存 now
             self._log(f"(线程{thread_id})商品{item_id}开始监视库存")
             url = f"{self.protocol}://mall.bilibili.com/mall-c/items/info?itemsId={item_id}"
             while True:
                 response = self._requests("get", url)
                 if response and response.get("code") == 0 and response['data']['activityInfoVO']['serverTime'] >= response['data']['activityInfoVO']['startTime'] if response['data']['activityInfoVO'] else True:
                     break
+            '''
             timestamp = time.time()
             in_stock = False
             while True:
