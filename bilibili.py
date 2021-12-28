@@ -1007,6 +1007,7 @@ class Bilibili:
                 try:
                     element = driver.find_element_by_class_name(class_name)
                     element.click()
+                    self._log(f"(线程{thread_id})click {class_name}")
                 except:
                     element = None
                 return element
@@ -1014,7 +1015,8 @@ class Bilibili:
             options = webdriver.ChromeOptions()
             options.add_argument("log-level=3")
             if headless:
-                options.add_argument("headless")
+                pass
+                #options.add_argument("headless")
             else:
                 options.add_argument("disable-infobars")
                 options.add_argument("window-size=374,729")
@@ -1032,7 +1034,8 @@ class Bilibili:
                     'domain': ".bilibili.com",
                 })
 
-            '''   #can not 监视库存 now
+            ''' 
+            没有监控库存功能了
             self._log(f"(线程{thread_id})商品{item_id}开始监视库存")
             url = f"{self.protocol}://mall.bilibili.com/mall-c/items/info?itemsId={item_id}"
             while True:
@@ -1041,19 +1044,22 @@ class Bilibili:
                     break
             '''
             timestamp = time.time()
-            in_stock = False
-            while True:
+            while True:   #未付款订单数不能超过5
                 try:
-                    result = {class_name: find_and_click(class_name) for class_name in ["bottom-buy-button", "button", "dot", "pay-btn", "expire-time-format", "alert-ok", "error-button"]}
+                    result = {class_name: find_and_click(class_name) for class_name in ["bottom-buy-button","button", "dot", "pay-btn", "expire-time-format", "alert-ok", "error-button"]}
+                    '''
+                    依次点击以下按钮，完成下单流程:
+                    1.bottom-buy-button   立即购买
+                    2.button              确定
+                    3.dot                 会员购服务协议
+                    4.pay-btn             提交订单
+                    5.expire-time-format  剩余支付时间
+                    '''
                     if result['bottom-buy-button']:
                         if "bottom-buy-disable" not in result['bottom-buy-button'].get_attribute("class"):
-                            if not in_stock:
-                                self._log(f"(线程{thread_id})商品{item_id}已开放购买")
-                                in_stock = True
+                            self._log(f"(线程{thread_id})商品{item_id}已开放购买")
                         else:
-                            if in_stock:
-                                self._log(f"(线程{thread_id})商品{item_id}暂无法购买, 原因为{result['bottom-buy-button'].text}")
-                                in_stock = False
+                            self._log(f"(线程{thread_id})商品{item_id}暂无法购买, 原因为{result['bottom-buy-button'].text}")
                             driver.refresh()
                             timestamp = time.time()
                     if result['pay-btn']:
